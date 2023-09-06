@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import type { TableRowSelection } from 'antd/es/table/interface';
+
 
 interface DataType {
   key: React.Key;
+  id: number;
   name: string;
   age: number;
   address: string;
@@ -13,84 +14,58 @@ interface DataType {
 const columns: ColumnsType<DataType> = [
   {
     title: 'Name',
-    dataIndex: 'name',
+    dataIndex: 'first_name',
+    key: 'first_name',
+    render: (text) => <a>{text}</a>,
   },
   {
-    title: 'Age',
-    dataIndex: 'age',
+    title: 'Email',
+    dataIndex: 'email',
+    key: 'email',
   },
   {
-    title: 'Address',
-    dataIndex: 'address',
+    title: 'Register Number',
+    dataIndex: 'id',
+    key:'id'
   },
 ];
 
-const data: DataType[] = [];
-for (let i = 0; i < 46; i++) {
-  data.push({
-    key: i,
-    name: `Edward King ${i}`,
-    age: 32,
-    address: `London, Park Lane no. ${i}`,
-  });
-}
 
-const App: React.FC = () => {
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+const Suggestions: React.FC = () => {
+  const [data, setDataFetch] = useState<DataType[]>([]);
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
+ 
+  useEffect(() => {
+    console.log('Component App mounted');
+    const fetchData = async () => {
+      try {
+        const API_URL = "https://reqres.in/api/users?page=2";
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const { data } = await response.json();
+        setDataFetch(data);
+        console.log('Data updated:', data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-  const rowSelection: TableRowSelection<DataType> = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-    selections: [
-      Table.SELECTION_ALL,
-      Table.SELECTION_INVERT,
-      Table.SELECTION_NONE,
-      {
-        key: 'odd',
-        text: 'Select Odd Row',
-        onSelect: (changeableRowKeys) => {
-          let newSelectedRowKeys = [];
-          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
-            if (index % 2 !== 0) {
-              return false;
-            }
-            return true;
-          });
-          setSelectedRowKeys(newSelectedRowKeys);
-        },
-      },
-      {
-        key: 'even',
-        text: 'Select Even Row',
-        onSelect: (changeableRowKeys) => {
-          let newSelectedRowKeys = [];
-          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
-            if (index % 2 !== 0) {
-              return true;
-            }
-            return false;
-          });
-          setSelectedRowKeys(newSelectedRowKeys);
-        },
-      },
-    ],
-  };
+    fetchData();
+  }, []);
+
 
   return (
     <div>
       <h2>Suggestions</h2>
-    <Table rowSelection={rowSelection} columns={columns} dataSource={data} />;
+    <Table  columns={columns} dataSource={data.map(item => ({ ...item, key: item.id.toString() }))}  />;
     </div>
   )
  
 };
 
-export default App;
+export default Suggestions;
 
 /*
 const Suggestions: React.FC = () => {
