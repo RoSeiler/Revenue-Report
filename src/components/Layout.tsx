@@ -18,6 +18,7 @@ export const CustomLayout = () => {
       <Content>
         <div className="container">
           <Outlet /> {/* Renderiza las rutas secundarias */}
+          
         </div>
       </Content>
       <Footer>Este es el Footer</Footer>
